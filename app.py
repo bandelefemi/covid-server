@@ -15,6 +15,7 @@ MODEL_URL = "https://firebasestorage.googleapis.com/v0/b/luj-store.appspot.com/o
 
 # Model file name
 MODEL_PATH = "covid_classifier.h5"
+model = None  # Global model variable (loaded later)
 
 def download_model():
     """Download the model if it doesn't exist locally."""
@@ -35,13 +36,16 @@ def download_model():
         print("Failed to download model. Check URL or internet connection.")
         raise Exception("Model download failed.")
 
-# Ensure model is downloaded before loading
-download_model()
+def load_model():
+    """Load the TensorFlow model into memory."""
+    global model
+    if model is None:  # Load model only if not already loaded
+        print("Loading model...")
+        model = tf.keras.models.load_model(MODEL_PATH)
+        print("Model loaded successfully!")
 
-# Load the model
-print("Loading model...")
-model = tf.keras.models.load_model(MODEL_PATH)
-print("Model loaded successfully!")
+# Ensure model is downloaded before the first request
+download_model()
 
 # Preprocess the image
 def preprocess_image(image):
@@ -67,6 +71,9 @@ def predict():
     file = request.files["file"]
     image = Image.open(io.BytesIO(file.read()))
     processed_image = preprocess_image(image)
+
+    # Load the model (only on first request)
+    load_model()
 
     # Make prediction
     predictions = model.predict(processed_image).tolist()
