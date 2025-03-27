@@ -8,7 +8,7 @@ import requests
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
+# CORS(app, resources={r"/*": {"origins": "*"}})  # Allow all origins
 
 # URL of your hosted model
 MODEL_URL = "https://firebasestorage.googleapis.com/v0/b/luj-store.appspot.com/o/covid_classifier.h5?alt=media&token=1334a928-5848-44ca-9852-958ec025848e"
@@ -55,15 +55,19 @@ def preprocess_image(image):
     image = np.expand_dims(image, axis=0)  # Add batch dimension
     return image
 
+@app.route("/")
+def home():
+    return "Hello, Flask is working!"
+
 @app.route("/predict", methods=["POST", "OPTIONS"])
 def predict():
-    if request.method == "OPTIONS":
-        # Handle CORS preflight request
-        response = jsonify({"message": "CORS preflight successful"})
-        response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type"
-        return response, 200
+    # if request.method == "OPTIONS":
+    #     # Handle CORS preflight request
+    #     response = jsonify({"message": "CORS preflight successful"})
+    #     response.headers["Access-Control-Allow-Origin"] = "*"
+    #     response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    #     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    #     return response, 200
 
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
